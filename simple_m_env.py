@@ -11,36 +11,26 @@ class MissileEnv:
     #act dim: 3?
 
     def __init__(self):
-        self.max_bounds = np.array([np.float64(1.), np.float64(1.), np.float64(1.)])
         self.target_pos = np.array([np.float64(10.), np.float64(0.), np.float64(0.)])
-        self.target_vel = np.array([np.float64(0.), np.float64(0.), np.float64(0.)])
         self.missile_pos = np.array([np.float64(0.), np.float64(0.), np.float64(0.)])
-        self.missile_vel = np.array([np.float64(0.), np.float64(0.), np.float64(0.)])
-        self.time = np.float64(0.)
-        self.d_time = np.float64(0.1)
 
     def make_obs(self):
-        return np.stack((self.target_pos, self.target_vel,
-                        self.missile_pos, self.missile_vel))
+        return self.target_pos - self.missile_pos
 
     def render(self):
         pass
 
     def reset(self):
-        self.target_pos = np.array([np.float64(10.), np.float64(0.), np.float64(0.)])
-        self.target_vel = np.array([np.float64(0.), np.float64(0.), np.float64(0.)])
-        self.missile_pos = np.array([np.float64(0.), np.float64(0.), np.float64(0.)])
-        self.missile_vel = np.array([np.float64(0.), np.float64(0.), np.float64(0.)])
-        self.time = np.float64(0.)
+        self.target_pos = np.array([get_ran10(), get_ran10(), get_ran10()])
+        self.missile_pos = np.array([get_ran10(), get_ran10(), get_ran10()])
         return self.make_obs()
 
     def step(self, action):
         #self.target_update()
-        self.missile_pos += self.missile_vel * self.d_time + 0.5 * action * self.d_time * self.d_time
-        self.missile_vel += action * self.d_time
-        if np.linalg.norm(self.missile_vel) > 1:
-            self.missile_vel = normalise(self.missile_vel)
-        self.time += self.d_time
+        self.missile_pos += action
+        # if np.linalg.norm(self.missile_vel) > 1:
+        #     self.missile_vel = normalise(self.missile_vel)
+        # self.time += self.d_time
         return self.make_obs(), self.calculate_reward(), self.hit(), None
 
     def target_update(self):
@@ -63,6 +53,9 @@ def normalise(v):
     if norm == 0:
        return v
     return v / norm
+
+def get_ran10():
+    return (0.5 - np.random.ranf()) * 20
 
 if __name__ == '__main__':
     env = MissileEnv()

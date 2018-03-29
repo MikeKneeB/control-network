@@ -96,7 +96,7 @@ def train(sess, actor_model, critic_model, env, state_dim, action_dim, max_actio
                 obs_1 = obsComp(obs_1)
 
             # reward_total for output.
-            reward_total = 0
+            reward_total = []
 
             # UNCOMMENT FOR GIFS - if you have byzanz installed.
             # if epo == 10 or epo == 50 or epo == 100 or epo == 150 or epo == 200 or epo == 250 or epo == 300:
@@ -114,17 +114,18 @@ def train(sess, actor_model, critic_model, env, state_dim, action_dim, max_actio
                 # Calculate noise amount, set to half epsilon.
                 noise_r = epsilon/2.
                 # Calculate noisy action.
-                action = actor_model.predict(obs_1.reshape(1, state_dim))# + random.uniform(-noise_r, noise_r)
-                if action + noise_r > max_action:
-                    diff = max_action - action
-                    #assert diff >= 0
-                    action = action + random.uniform(diff - epsilon, diff)
-                elif action - noise_r < -max_action:
-                    diff = -max_action - action
-                    #assert diff <= 0
-                    action = action + random.uniform(diff, epsilon + diff)
-                else:
-                    action = action + random.uniform(-noise_r, noise_r)
+                action = actor_model.predict(obs_1.reshape(1, state_dim))[0]# + random.uniform(-noise_r, noise_r)
+                for i, item in enumerate(action):
+                    if item + noise_r > max_action:
+                        diff = max_action - item
+                        #assert diff >= 0
+                        action[i] = item + random.uniform(diff - epsilon, diff)
+                    elif item - noise_r < -max_action:
+                        diff = -max_action - item
+                        #assert diff <= 0
+                        action[i] = item + random.uniform(diff, epsilon + diff)
+                    else:
+                        action[i] = item + random.uniform(-noise_r, noise_r)
 
                 print('Act val: {} [{}, {}, {}]'.format(action, epo, j, epsilon))
 
@@ -209,8 +210,6 @@ def train(sess, actor_model, critic_model, env, state_dim, action_dim, max_actio
                 # Ensure epsilon does not go below minimum.
                 if epsilon < min_epsilon:
                     epsilon = min_epsilon
-
-
         f.close()
 
 """
